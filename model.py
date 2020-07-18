@@ -34,11 +34,10 @@ class MOE_Model (keras.Model):
 
     def loss(self, inputs, true_outputs):
         gates = tf.expand_dims(self.gate(inputs), -1)
-        values = tf.stack([true_outputs - expert(inputs) for expert in self.experts], axis = -1)
-        exponents = tf.expand_dims(tf.math.exp(-(tf.math.reduce_euclidean_norm(values, axis = 1)**2)), -2)
+        values = tf.stack([expert(inputs) for expert in self.experts], axis = -1)
+        probabilities = tf.reduce_sum(tf.multiply(tf.expand_dims(true_outputs, -1),values), axis = 1, keepdims = True)
+        return -tf.math.log(tf.matmul(probabilities, gates))
         
-        return - tf.math.log(tf.reshape(tf.matmul(exponents, gates), (-1,)))
-
     def grad(self, inputs, true_outputs):
         with tf.GradientTape() as tape:
             l = self.loss(inputs, true_outputs)
