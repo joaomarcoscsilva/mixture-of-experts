@@ -31,20 +31,24 @@ class MOE_Model (keras.Model):
         gates = tf.expand_dims(self.gate(inputs), -1)
         values = tf.stack([expert(inputs) for expert in self.experts], axis = -1)
         return tf.matmul(values, gates)
+    
+    def probabilities(self, inputs, outputs):
+        values = self.call(inputs)
+        return tf.reduce_sum(tf.multiply(tf.expand_dims(outputs, -1),values), axis = 1)
+
 
     def loss(self, inputs, true_outputs):
-        gates = tf.expand_dims(self.gate(inputs), -1)
-        values = tf.stack([expert(inputs) for expert in self.experts], axis = -1)
-        probabilities = tf.reduce_sum(tf.multiply(tf.expand_dims(true_outputs, -1),values), axis = 1, keepdims = True)
-        return -tf.math.log(tf.matmul(probabilities, gates))
+        probs = self.probabilities(inputs, true_outputs)
+        return -tf.math.log(probs)
         
     def grad(self, inputs, true_outputs):
         with tf.GradientTape() as tape:
             l = self.loss(inputs, true_outputs)
         gradients = tape.gradient(l, self.trainable_variables)
-        return gradients
+        return gradients, l
 
     def step(self, inputs, true_outputs):
-        grads = self.grad(inputs, true_outputs)
+        grads, l = self.grad(inputs, true_outputs)
         self.optimizer.apply_gradients(zip(grads, self.trainable_variables))
+        return l
 
