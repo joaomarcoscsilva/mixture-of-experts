@@ -5,7 +5,6 @@ import tensorflow as tf
 def get_experts(n_experts, input_shape = (28*28,)):
     return [keras.Sequential([
         Dense(32, activation = 'relu', input_shape = input_shape),
-        Dense(64, activation = 'relu'),
         Dense(10, activation = 'softmax')]) 
 
         for i in range(n_experts)]
@@ -13,7 +12,6 @@ def get_experts(n_experts, input_shape = (28*28,)):
 def get_gate(n_experts, input_shape = (28*28,)):
     return keras.Sequential([
         Dense(32, activation = 'relu', input_shape = input_shape),
-        Dense(64, activation = 'relu'),
         Dense(n_experts, activation = 'softmax')])
 
 
@@ -37,13 +35,13 @@ class MOE_Model (keras.Model):
         return tf.reduce_sum(tf.multiply(tf.expand_dims(outputs, -1),values), axis = 1)
 
 
-    def loss(self, inputs, true_outputs):
+    def calculate_loss(self, inputs, true_outputs):
         probs = self.probabilities(inputs, true_outputs)
         return -tf.math.log(probs)
         
     def grad(self, inputs, true_outputs):
         with tf.GradientTape() as tape:
-            l = self.loss(inputs, true_outputs)
+            l = self.calculate_loss(inputs, true_outputs)
         gradients = tape.gradient(l, self.trainable_variables)
         return gradients, l
 
