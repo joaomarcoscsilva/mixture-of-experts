@@ -2,7 +2,6 @@ import tensorflow as tf
 
 def train_model(model, dataset, epochs):
     for epoch in range(epochs):
-        print('doing epoch',epoch)
         
         bar = tf.keras.utils.Progbar(tf.data.experimental.cardinality(dataset).numpy())
 
