@@ -14,8 +14,8 @@ def load_mnist(batch_size = 32, shuffle_size = 100):
     x_train = x_train.reshape(-1, 28*28)
     x_test = x_test.reshape(-1, 28*28)
 
-    train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(shuffle_size).batch(batch_size)
-    test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test)).shuffle(shuffle_size).batch(batch_size)
+    train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(shuffle_size).batch(batch_size, drop_remainder=True)
+    test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test)).shuffle(shuffle_size).batch(batch_size, drop_remainder=True)
     return train_dataset, test_dataset
 
 def load_cifar(batch_size = 32, shuffle_size = 100):

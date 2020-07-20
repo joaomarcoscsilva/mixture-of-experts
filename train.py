@@ -1,5 +1,4 @@
 import tensorflow as tf
-import tqdm
 
 def train_model(model, dataset, epochs):
     for epoch in range(epochs):
