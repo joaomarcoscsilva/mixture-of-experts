@@ -29,11 +29,20 @@ class MOE_Model (keras.Model):
         gates = tf.expand_dims(self.gate(inputs), -1)
         values = tf.stack([expert(inputs) for expert in self.experts], axis = -1)
         return tf.matmul(values, gates)
+
+    # The following functions are actually never called in the implemented 
+    # training loop (that uses the keras fit function with categorical crossentropy)
+    # However, if a custom training loop was made, simply calling the step function on each batch would work
     
+    # Notice that the loss function is not defined in terms of model.call, but in terms of the predicted probabilities
+    # While both aproaches are equivalent for classification, they are 
+    # actually different for regression, treating MoE as a mixture of gaussians
+    # If this code were to be adapted to perform regression, all that would need to be done is to implement the correct 
+    # probabilities function and then call the step function in a custom training loop
+
     def probabilities(self, inputs, outputs):
         values = self.call(inputs)
         return tf.reduce_sum(tf.multiply(tf.expand_dims(outputs, -1),values), axis = 1)
-
 
     def calculate_loss(self, inputs, true_outputs):
         probs = self.probabilities(inputs, true_outputs)
