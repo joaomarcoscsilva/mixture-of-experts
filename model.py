@@ -4,14 +4,17 @@ import tensorflow as tf
 
 def get_experts(n_experts, input_shape = (28*28,)):
     return [keras.Sequential([
-        Dense(32, activation = 'relu', input_shape = input_shape),
+        Dense(64, activation = 'relu', input_shape = input_shape),
+        Dense(128, activation = 'relu'),
+        Dense(256, activation = 'relu'),
         Dense(10, activation = 'softmax')]) 
 
         for i in range(n_experts)]
 
 def get_gate(n_experts, input_shape = (28*28,)):
     return keras.Sequential([
-        Dense(32, activation = 'relu', input_shape = input_shape),
+        Dense(64, activation = 'relu', input_shape = input_shape),
+        Dense(128, activation = 'relu'),
         Dense(n_experts, activation = 'softmax')])
 
 
